@@ -1,6 +1,4 @@
-using WebApiTemplate.Core.Customers;
-
-namespace WebApiTemplate.Api.Customers.Requests;
+namespace WebApiTemplate.Api.Products.Requests;
 
 public class UpdateProductRequest
 {

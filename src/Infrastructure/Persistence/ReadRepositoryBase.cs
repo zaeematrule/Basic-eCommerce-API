@@ -7,7 +7,7 @@ namespace WebApiTemplate.Infrastructure.Persistence;
 public abstract class ReadRepositoryBase<T> : IReadRepository<T>
     where T : BaseEntity
 {
-    protected readonly AppDbContext  _db;
+    protected readonly AppDbContext _db;
 
     public ReadRepositoryBase(AppDbContext db)
     {

@@ -1,19 +1,19 @@
-using System.ComponentModel;
 using FluentValidation;
 using HumbleMediator;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using SimpleInjector;
+using WebApiTemplate.Api;
 using WebApiTemplate.Application;
-using WebApiTemplate.Application.Customers.Commands;
-using WebApiTemplate.Application.Customers.Queries;
 using WebApiTemplate.Application.Logging;
+using WebApiTemplate.Application.Products.Commands;
+using WebApiTemplate.Application.Products.Queries;
 using WebApiTemplate.Application.Validation;
 using WebApiTemplate.Core;
-using WebApiTemplate.Core.Customers;
-using WebApiTemplate.Infrastructure.Customers;
+using WebApiTemplate.Core.Products;
 using WebApiTemplate.Infrastructure.Persistence;
+using WebApiTemplate.Infrastructure.Products;
 using Container = SimpleInjector.Container;
 
 Log.Logger = new LoggerConfiguration()
@@ -38,10 +38,10 @@ try
 
     builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
     builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
-   // Persistence
-   var connString =
-       builder.Configuration.GetConnectionString("Default")
-       ?? throw new ArgumentNullException("connectionString");
+    // Persistence
+    var connString =
+        builder.Configuration.GetConnectionString("Default")
+        ?? throw new ArgumentNullException("connectionString");
 
     builder.Services.AddPooledDbContextFactory<AppDbContext>((sp, options) =>
         options.UseSqlServer(connString));
@@ -52,30 +52,35 @@ try
 
     builder.Services.AddDistributedMemoryCache();
 
+    builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
+
     // SimpleInjector
-    var container = Container;
+    var container = WebApiTemplate.Api.Program.Container;
     container.Options.DefaultLifestyle = Lifestyle.Singleton;
     builder.Services.AddSimpleInjector(
         container,
         options => options.AddAspNetCore().AddControllerActivation()
     );
 
-    container.Register<ICustomerReadRepository, CustomerReadRepository>();
-    container.Register<ICustomerWriteRepository, CustomerWriteRepository>();
+    container.Register<IProductReadRepository, ProductReadRepository>();
+    container.Register<IProductWriteRepository, ProductWriteRepository>();
     container.Register<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
     // validators
     container.Collection.Register(
         typeof(IValidator<>),
-        typeof(GetCustomerByIdQueryValidator).Assembly
+        typeof(GetProductByIdQueryValidator).Assembly
     );
 
     // mediator
     container.Register<IMediator>(() => new Mediator(container.GetInstance));
 
     // mediator handlers
-    container.Register(typeof(ICommandHandler<,>), typeof(CreateCustomerCommandHandler).Assembly);
-    container.Register(typeof(IQueryHandler<,>), typeof(GetCustomerByIdQueryHandler).Assembly);
+    container.Register(typeof(ICommandHandler<,>), typeof(CreateProductCommandHandler).Assembly);
+    container.Register(typeof(IQueryHandler<,>), typeof(GetProductByIdQueryHandler).Assembly);
 
     // mediator handlers decorators - queries pipeline
     container.RegisterDecorator(
@@ -148,7 +153,10 @@ finally
     Log.CloseAndFlush();
 }
 
-public partial class Program
+namespace WebApiTemplate.Api
 {
-    public static readonly Container Container = new();
+    public partial class Program
+    {
+        public static readonly Container Container = new();
+    }
 }

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using WebApiTemplate.Core.Customers;
+using WebApiTemplate.Core.Products;
 
 namespace WebApiTemplate.Infrastructure.Persistence;
 

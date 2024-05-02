@@ -1,5 +1,3 @@
-using WebApiTemplate.Core.Customers;
-
 namespace WebApiTemplate.Core;
 
 public interface IReadRepository<T>

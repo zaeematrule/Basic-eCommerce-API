@@ -1,34 +1,34 @@
 using HumbleMediator;
 using Microsoft.AspNetCore.Mvc;
-using WebApiTemplate.Api.Customers.Requests;
-using WebApiTemplate.Api.Customers.Responses;
-using WebApiTemplate.Application.Customers.Commands;
-using WebApiTemplate.Application.Customers.Queries;
+using WebApiTemplate.Api.Products.Requests;
+using WebApiTemplate.Application.Products.Commands;
+using WebApiTemplate.Application.Products.Queries;
 using WebApiTemplate.Core;
-using WebApiTemplate.Core.Customers;
-using WebApiTemplate.Infrastructure.Persistence;
+using WebApiTemplate.Core.Products;
 
-namespace WebApiTemplate.Api.Customers;
+namespace WebApiTemplate.Api.Products;
 
-public sealed class CustomersController : AppControllerBase
+public sealed class ProductsController : AppControllerBase
 {
-    public CustomersController(IMediator mediator)
-        : base(mediator) { }
+    public ProductsController(IMediator mediator)
+        : base(mediator)
+    {
+    }
 
     [HttpPost]
     [Route("")]
-    public async Task<ActionResult<CustomerCreatedResponse>> Create(CreateCustomerCommand request)
+    public async Task<IActionResult> Create(CreateProductCommand request)
     {
-        var id = await _mediator.SendCommand<CreateCustomerCommand, int>(request);
-        return CreatedAtAction(nameof(GetById), new { id }, new CustomerCreatedResponse(id));
+        var result = await _mediator.SendCommand<CreateProductCommand, Product>(request);
+        return Ok(result);
     }
 
     [HttpGet]
     [Route("{id:int}")]
-    public async Task<ActionResult<Product>> GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var result = await _mediator.SendQuery<GetCustomerByIdQuery, Product?>(
-            new GetCustomerByIdQuery(id)
+        var result = await _mediator.SendQuery<GetProductByIdQuery, Product?>(
+            new GetProductByIdQuery(id)
         );
         if (result is null)
         {
@@ -40,10 +40,10 @@ public sealed class CustomersController : AppControllerBase
 
     [HttpGet]
     [Route("")]
-    public async Task<ActionResult<Product>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {
-        var result = await _mediator.SendQuery<GetAllCustomersQuery, PaginatedResponse<Product>>(
-            new GetAllCustomersQuery { Page = page, PageSize = pageSize}
+        var result = await _mediator.SendQuery<GetAllProductsQuery, PaginatedResponse<Product>>(
+            new GetAllProductsQuery { Page = page, PageSize = pageSize }
         );
         if (result is null)
         {
@@ -57,24 +57,25 @@ public sealed class CustomersController : AppControllerBase
     [Route("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateProductRequest request)
     {
-        Product product = new Product(request.ProductId)
+        var product = new Product(request.ProductId)
         {
             Name = request.Name,
             Description = request.Description,
             Price = request.Price,
             Quantity = request.Quantity
         };
-        await _mediator.SendCommand<UpdateCustomerCommand, Nothing>(
-            new UpdateCustomerCommand(id, product)
+        var result = await _mediator.SendCommand<UpdateProductCommand, Product>(
+            new UpdateProductCommand(id, product)
         );
-        return NoContent();
+        return Ok(result);
     }
 
     [HttpDelete]
     [Route("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _mediator.SendCommand<DeleteCustomerCommand, Nothing>(new DeleteCustomerCommand(id));
-        return NoContent();
+        var status =
+            await _mediator.SendCommand<DeleteProductCommand, StatusCodeResponse>(new DeleteProductCommand(id));
+        return Ok(status);
     }
 }

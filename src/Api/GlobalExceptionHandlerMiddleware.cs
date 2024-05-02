@@ -1,6 +1,8 @@
 using FluentValidation;
 using Newtonsoft.Json;
 
+namespace WebApiTemplate.Api;
+
 public class GlobalExceptionHandlerMiddleware : IMiddleware
 {
     private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
@@ -47,6 +49,11 @@ public class GlobalExceptionHandlerMiddleware : IMiddleware
         // Handle other types of exceptions here, such as logging and returning a generic error response.
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.Headers.Add("Content-Type", "application/problem+json");
+        if (!string.IsNullOrEmpty(ex.Message))
+        {
+            context.Response.WriteAsync(ex.Message);
+            return;
+        }
         context.Response.WriteAsync("{\"error\": \"An unexpected error occurred.\"}");
     }
 }
