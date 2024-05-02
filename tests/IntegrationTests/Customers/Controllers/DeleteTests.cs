@@ -21,14 +21,14 @@ public class DeleteTests : BaseTestClass
             IDbContextFactory<AppDbContext>
         >();
         var context = await contextFactory.CreateDbContextAsync();
-        context.Customers.Add(new Core.Customers.Customer(id));
+        context.Products.Add(new Core.Customers.Product(id));
         await context.SaveChangesAsync();
 
         var client = _factory.CreateClient();
         var response = await client.DeleteAsync($"/api/customers/{id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        var allCustomers = await context.Customers.ToListAsync();
+        var allCustomers = await context.Products.ToListAsync();
         allCustomers.Should().BeEmpty();
     }
 }

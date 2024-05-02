@@ -4,7 +4,7 @@ using WebApiTemplate.Infrastructure.Persistence;
 
 namespace WebApiTemplate.Infrastructure.Customers;
 
-public class CustomerWriteRepository : WriteRepositoryBase<Customer>, ICustomerWriteRepository
+public class CustomerWriteRepository : WriteRepositoryBase<Product>, ICustomerWriteRepository
 {
     public CustomerWriteRepository()
         : base() { }

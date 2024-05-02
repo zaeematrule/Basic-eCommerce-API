@@ -7,6 +7,6 @@ public sealed class UpdateCustomerCommandValidator : AbstractValidator<UpdateCus
     public UpdateCustomerCommandValidator()
     {
         RuleFor(e => e.Id).Must(e => e > 0);
-        RuleFor(e => e.Customer).NotEmpty();
+        RuleFor(e => e.Product).NotEmpty();
     }
 }

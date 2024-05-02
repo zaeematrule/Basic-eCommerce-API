@@ -1,7 +1,7 @@
+using System.ComponentModel;
 using FluentValidation;
 using HumbleMediator;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Serilog;
 using Serilog.Events;
 using SimpleInjector;
@@ -14,6 +14,7 @@ using WebApiTemplate.Core;
 using WebApiTemplate.Core.Customers;
 using WebApiTemplate.Infrastructure.Customers;
 using WebApiTemplate.Infrastructure.Persistence;
+using Container = SimpleInjector.Container;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -36,17 +37,19 @@ try
     builder.Services.AddSwaggerGen();
 
     builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
+    builder.Services.AddScoped<GlobalExceptionHandlerMiddleware>();
+   // Persistence
+   var connString =
+       builder.Configuration.GetConnectionString("Default")
+       ?? throw new ArgumentNullException("connectionString");
 
-    // persistence
-    var connString =
-        builder.Configuration.GetConnectionString("Default")
-        ?? throw new ArgumentNullException("connectionString");
-    builder.Services.AddNpgsqlDataSource(connString);
+    builder.Services.AddPooledDbContextFactory<AppDbContext>((sp, options) =>
+        options.UseSqlServer(connString));
 
-    Action<IServiceProvider, DbContextOptionsBuilder> dbConfigure = (sp, options) =>
-        options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>()).UseSnakeCaseNamingConvention();
-    builder.Services.AddDbContext<AppDbContext>(dbConfigure, ServiceLifetime.Singleton);
-    builder.Services.AddPooledDbContextFactory<AppDbContext>(dbConfigure);
+    builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+        options.UseSqlServer(connString), ServiceLifetime.Singleton);
+
+
     builder.Services.AddDistributedMemoryCache();
 
     // SimpleInjector
@@ -126,6 +129,7 @@ try
 
     app.MapHealthChecks("/health");
 
+    app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
     app.UseAuthorization();
     app.MapControllers();
 

@@ -14,7 +14,7 @@ public class HandleTests
         // Arrange
         var mockWriteRepository = Substitute.For<ICustomerWriteRepository>();
         mockWriteRepository
-            .Create(Arg.Any<Customer>(), Arg.Any<IUnitOfWork>())
+            .Create(Arg.Any<Product>(), Arg.Any<IUnitOfWork>())
             .Returns(Nothing.Instance);
 
         var mockUow = Substitute.For<IUnitOfWork>();
@@ -26,7 +26,7 @@ public class HandleTests
             mockUowFactory,
             mockWriteRepository
         );
-        var newEntity = new Customer(13452);
+        var newEntity = new Product(13452);
 
         // Act
         await sut.Handle(new CreateCustomerCommand(newEntity));

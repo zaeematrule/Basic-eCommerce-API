@@ -6,6 +6,7 @@ using WebApiTemplate.Application.Customers.Commands;
 using WebApiTemplate.Application.Customers.Queries;
 using WebApiTemplate.Core;
 using WebApiTemplate.Core.Customers;
+using WebApiTemplate.Infrastructure.Persistence;
 
 namespace WebApiTemplate.Api.Customers;
 
@@ -16,20 +17,33 @@ public sealed class CustomersController : AppControllerBase
 
     [HttpPost]
     [Route("")]
-    public async Task<ActionResult<CustomerCreatedResponse>> Create(CreateCustomerRequest request)
+    public async Task<ActionResult<CustomerCreatedResponse>> Create(CreateCustomerCommand request)
     {
-        var id = await _mediator.SendCommand<CreateCustomerCommand, int>(
-            new CreateCustomerCommand(CreateCustomerRequest.ToDomainEntity())
-        );
+        var id = await _mediator.SendCommand<CreateCustomerCommand, int>(request);
         return CreatedAtAction(nameof(GetById), new { id }, new CustomerCreatedResponse(id));
     }
 
     [HttpGet]
     [Route("{id:int}")]
-    public async Task<ActionResult<Customer>> GetById(int id)
+    public async Task<ActionResult<Product>> GetById(int id)
     {
-        var result = await _mediator.SendQuery<GetCustomerByIdQuery, Customer?>(
+        var result = await _mediator.SendQuery<GetCustomerByIdQuery, Product?>(
             new GetCustomerByIdQuery(id)
+        );
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("")]
+    public async Task<ActionResult<Product>> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var result = await _mediator.SendQuery<GetAllCustomersQuery, PaginatedResponse<Product>>(
+            new GetAllCustomersQuery { Page = page, PageSize = pageSize}
         );
         if (result is null)
         {
@@ -41,10 +55,17 @@ public sealed class CustomersController : AppControllerBase
 
     [HttpPut]
     [Route("{id:int}")]
-    public async Task<IActionResult> Update(int id, UpdateCustomerRequest request)
+    public async Task<IActionResult> Update(int id, UpdateProductRequest request)
     {
+        Product product = new Product(request.ProductId)
+        {
+            Name = request.Name,
+            Description = request.Description,
+            Price = request.Price,
+            Quantity = request.Quantity
+        };
         await _mediator.SendCommand<UpdateCustomerCommand, Nothing>(
-            new UpdateCustomerCommand(id, UpdateCustomerRequest.ToDomainEntity())
+            new UpdateCustomerCommand(id, product)
         );
         return NoContent();
     }

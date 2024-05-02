@@ -21,7 +21,7 @@ public class GetByIdTests : BaseTestClass
             IDbContextFactory<AppDbContext>
         >();
         var context = await contextFactory.CreateDbContextAsync();
-        context.Customers.Add(new Core.Customers.Customer(id));
+        context.Products.Add(new Core.Customers.Product(id));
         await context.SaveChangesAsync();
 
         var client = _factory.CreateClient();
@@ -29,7 +29,7 @@ public class GetByIdTests : BaseTestClass
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var customer = await response.Content.ReadFromJsonAsync<Core.Customers.Customer>();
+        var customer = await response.Content.ReadFromJsonAsync<Core.Customers.Product>();
         customer.Should().NotBeNull();
         customer!.Id.Should().Be(id);
     }

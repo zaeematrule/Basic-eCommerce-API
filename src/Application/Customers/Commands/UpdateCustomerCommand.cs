@@ -4,4 +4,4 @@ using WebApiTemplate.Core.Customers;
 
 namespace WebApiTemplate.Application.Customers.Commands;
 
-public record UpdateCustomerCommand(int Id, Customer Customer) : ICommand<Nothing>;
+public record UpdateCustomerCommand(int Id, Product Product) : ICommand<Nothing>;

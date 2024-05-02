@@ -20,7 +20,7 @@ public class UpdateCustomerCommandHandler
     )
     {
         await using var uow = await _uowFactory.Create(cancellationToken);
-        await _repository.Update(command.Customer, uow);
+        await _repository.Update(command.Product, uow);
         await uow.Commit(cancellationToken);
         return Nothing.Instance;
     }

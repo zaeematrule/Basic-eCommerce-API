@@ -6,6 +6,6 @@ public sealed class CreateCustomerCommandValidator : AbstractValidator<CreateCus
 {
     public CreateCustomerCommandValidator()
     {
-        RuleFor(e => e.Customer).NotEmpty();
+        RuleFor(e => e.Name).NotEmpty();
     }
 }

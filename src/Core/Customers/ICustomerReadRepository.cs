@@ -1,3 +1,7 @@
+
 namespace WebApiTemplate.Core.Customers;
 
-public interface ICustomerReadRepository : IReadRepository<Customer> { }
+public interface ICustomerReadRepository : IReadRepository<Product>
+{
+
+}

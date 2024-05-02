@@ -35,7 +35,7 @@ public sealed class QueryHandlerCachingDecorator<TQuery, TQueryResult>
             JsonSerializer.Serialize(result),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5), // TODO: parametrize
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5), // TODO: parametrize
             },
             cancellationToken
         );

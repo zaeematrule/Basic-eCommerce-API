@@ -28,7 +28,7 @@ public class CreateTests : BaseTestClass
         >();
         var context = await contextFactory.CreateDbContextAsync();
 
-        var result = await context.Customers.SingleOrDefaultAsync();
+        var result = await context.Products.SingleOrDefaultAsync();
         result.Should().NotBeNull();
     }
 }
